@@ -1,0 +1,211 @@
+﻿@model PostCardAppV2.Models.Quote
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Quote</h4>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <dl class="row">
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.ID)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.ID)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.CustomerName)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.CustomerName)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.CardSize)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.CardSize)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Paper)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Paper)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Color)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Color)
+            </dd>
+
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.WithBleed)
+            </dt>
+            <dd class="col-sm-10">
+                @{ var ret = Model.DisplayBleed();}
+                @ret
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.CreatedOn)
+            </dt>
+            <dd class="col-sm-10">
+                @{
+                    var timezone = TimeZoneInfo.FindSystemTimeZoneById("Central Standard Time");
+                    var result = TimeZoneInfo.ConvertTimeFromUtc(Model.CreatedOn, timezone);
+                }
+                @result
+            </dd>
+        </dl>
+        <table>
+            <h3>Estimates</h3>
+            <thead>
+                <tr>
+                    <th class="w-50">
+                        Quantity
+                    </th>
+                    <th class="w-50">
+                        Price
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="Quantities">
+
+                @for (int i = 0; i < Model.Estimates.Count(); i++)
+                {
+                    <tr id="QuantityInput">
+                        <td>
+                            <div class="table-labels">
+                                <label class="mr-4">Quantity:  @Model.Estimates[i].Quantity </label>
+                            </div>
+
+                        </td>
+                        <td>
+                            <div class="table-labels">
+                                <label class="control-label mr-4">Price:  @Model.Estimates[i].Price.ToString("F")</label>
+                            </div>
+                        </td>
+                    </tr>
+
+                }
+            </tbody>
+
+        </table>
+
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script type="text/javascript">
+        $(document).ready(function () {
+        })
+
+        function displayBatch() {
+            var count = $("tr[id^=QuantityInput]").length
+            console.log(count)
+            $("#BatchNumber").val(count)
+            $("#BatchNumber").attr("style", "display:inline");
+        }
+
+        function AddQuantityInput(delta) {
+            for (var i = delta; i > 0; i--) {
+                var count = $("tr[id^=QuantityInput]").length
+                var el = $("#QuantityInput").clone();
+                el.find("#InputAmount").attr("name", "QuantitiesAndPrices[" + count + "].quantity");
+                el.find("#InputPrice").attr("name", "QuantitiesAndPrices[" + count + "].price");
+                $("#Quantities").append(el);
+            }
+            for (var i = delta; i < 0; i++) {
+                console.log($("tr[id='QuantityInput']").last())
+                $("tr[id='QuantityInput']").last().remove();
+            }
+        }
+
+        $("#BatchNumber").change(function () {
+            var count = $("tr[id^=QuantityInput]").length
+            var reqCount = $(this).val();
+            if (reqCount >= 1) {
+                var delta = reqCount - count;
+                console.log("delta = " + delta + "request count = " + reqCount);
+                AddQuantityInput(delta);
+            }
+
+        })
+
+        $("#CardSizes").change(function () {
+            var Id = $(this).val();
+            if (Id > 0) {
+                $.ajax({
+                    url: "https://localhost:44347/Quotes/GetPapers",
+                    data: { CardSizeId: Id },
+                    success: function (jsonString) {
+                        console.log(jsonString);
+                        var result = JSON.parse(jsonString)
+                        var template = $('<option />').text('Select Paper').val('0');
+                        var first = $("#PaperSelection").children("option:selected").clone();
+                        console.log(first);
+                        console.log(template);
+                        $("#PaperSelection").children().remove();
+                        $("#PaperSelection").prepend(template);
+                        var selected = 0;
+                        $.each(result, function (index, item) {
+                            console.log(item["name"])
+                            if (item["name"] != first.text()) {
+                                $("#PaperSelection").append(template.clone().attr("value", item["id"]).text(item["name"]));
+                            } else {
+                                selected = first.val();
+                                $("#PaperSelection").append(first);
+                            }
+                        })
+                        $("#PaperSelection").val(selected)
+                    }
+                })
+            }
+
+        })
+        $("#PaperSelection").change(function () {
+            var Id = $(this).val();
+            if (Id > 0) {
+                $.ajax({
+                    url: "https://localhost:44347/Quotes/GetCardSizes",
+                    data: { paperId: Id },
+                    success: function (jsonString) {
+                        console.log(jsonString);
+                        var result = JSON.parse(jsonString)
+                        var template = $('<option />').text('Select CardSize').val('0');
+                        var first = $("#CardSizes").children("option:selected").clone();
+                        console.log(first);
+                        console.log(template);
+                        $("#CardSizes").children().remove();
+                        $("#CardSizes").prepend(template);
+                        var selected = 0;
+                        $.each(result, function (index, item) {
+                            console.log(item["name"])
+                            if (item["name"] != first.text()) {
+                                $("#CardSizes").append(template.clone().attr("value", item["id"]).text(item["name"]));
+                            } else {
+                                selected = first.val();
+                                $("#CardSizes").append(first);
+                            }
+                        })
+                        $("#CardSizes").val(selected)
+                    }
+
+                })
+
+            }
+        })
+
+
+
+    </script>
+}
+

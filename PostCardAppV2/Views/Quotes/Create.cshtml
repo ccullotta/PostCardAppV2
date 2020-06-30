@@ -1,0 +1,230 @@
+﻿@model PostCardAppV2.Models.dtos.QuotesCreateDto
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>Quote</h4>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form method="post">
+            <div class="w-50 mb-4">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="CustomerName" class="control-label"></label>
+                    <input asp-for="CustomerName" class="form-control" />
+                    <span asp-validation-for="CustomerName" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="CardSize" class="control-label"></label>
+                    <select id="CardSizes" asp-for="CardSizeId" class="form-control" asp-items="ViewBag.CardSizeId">
+                        <option>Select CardSize</option>
+                    </select>
+                    <span asp-validation-for="CardSizeId" class="text-danger"></span>
+
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Paper" class="control-label"></label>
+                    <select id="PaperSelection" asp-for="PaperId" class="form-control" asp-items="ViewBag.PaperId">
+                        <option>Select Paper</option>
+                    </select>
+                    <span asp-validation-for="PaperId" class="text-danger"></span>
+
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Color" class="control-label"></label>
+                    <select asp-for="ColorId" class="form-control" asp-items="ViewBag.ColorId">
+                        <option>Select Color</option>
+                    </select>
+                    <span asp-validation-for="PaperId" class="text-danger"></span>
+                </div>
+                <div class="form-group form-check">
+                    <label class="form-check-label">
+                        <input class="form-check-input" asp-for="WithBleed" /> @Html.DisplayNameFor(model => model.WithBleed)
+                    </label>
+                </div>
+            </div>
+            <div class="form-group">
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="w-50">
+                                Quantity
+                            </th>
+                            <th class="w-50">
+                                Price
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="Quantities">
+
+                        @for (int i = 0; i < Model.QuantitiesAndPrices.Count(); i++)
+                        {
+                            <tr id="QuantityInput">
+                                <td>
+                                    <div class="table-labels">
+                                        <label class="mr-4" asp-for="Quantity"></label>
+                                        <input class="form-control mr-4" id="InputAmount" asp-for="QuantitiesAndPrices[i].Quantity" />
+                                    </div>
+
+                                </td>
+                                <td>
+                                    <div class="table-labels">
+
+                                        <label class="control-label mr-4" asp-for="Price"></label>
+                                        <label class="control-label" id="InputPrice" name="QuantitiesAndPrices[@i].price">$ @Model.QuantitiesAndPrices[i].Price.ToString("F")</label>
+                                    </div>
+                                </td>
+                            </tr>
+
+                        }
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <div class="form-group">
+
+            </div>
+
+            <div class="form-group">
+                <a href="#" onclick="displayBatch()">Batch Create</a>
+                <input id="BatchNumber" type="number" style="display:none" />
+                <div>
+                    <span asp-validation-for="Quantity" class="text-danger"></span>
+                    <input type="submit" value="Calculate Estimates" asp-action="Calculate" class="btn btn-secondary" />
+                    <input type="submit" value="Save" asp-action="Create" class="btn btn-primary" />
+                </div>
+                <span class="text-danger">@ViewData["Error"] </span>
+
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<div class="">
+    <a asp-action="Index">Back to List</a>
+</div>
+@section Bottom {
+
+    @*<div class="d-flex justify-content-center">
+                <a asp-action="Index" >Back to List</a>
+            </div>
+        }*@
+}
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script type="text/javascript">
+        $(document).ready(function () {
+        })
+
+        function displayBatch() {
+            var count = $("tr[id^=QuantityInput]").length
+            console.log(count)
+            $("#BatchNumber").val(count)
+            $("#BatchNumber").attr("style", "display:inline");
+        }
+
+        function AddQuantityInput(delta) {
+            for (var i = delta; i > 0; i--) {
+                var count = $("tr[id^=QuantityInput]").length
+                var el = $("#QuantityInput").clone();
+                el.find("#InputAmount").attr("name", "QuantitiesAndPrices[" + count + "].quantity");
+                el.find("#InputPrice").attr("name", "QuantitiesAndPrices[" + count + "].price");
+                $("#Quantities").append(el);
+            }
+            for (var i = delta; i < 0; i++) {
+                console.log($("tr[id='QuantityInput']").last())
+                $("tr[id='QuantityInput']").last().remove();
+            }
+        }
+
+        $("#BatchNumber").change(function () {
+            var count = $("tr[id^=QuantityInput]").length
+            var reqCount = $(this).val();
+            if (reqCount >= 1) {
+                var delta = reqCount - count;
+                console.log("delta = " + delta + "request count = " + reqCount);
+                AddQuantityInput(delta);
+            }
+
+        })
+
+        $("#CardSizes").change(function () {
+            var Id = $(this).val();
+            if (Id > 0) {
+                $.ajax({
+                    url: "https://localhost:44347/Quotes/GetPapers",
+                    data: { CardSizeId: Id },
+                    success: function (jsonString) {
+                        console.log(jsonString);
+                        var result = JSON.parse(jsonString)
+                        var template = $('<option />').text('Select Paper').val('0');
+                        var first = $("#PaperSelection").children("option:selected").clone();
+                        console.log(first);
+                        console.log(template);
+                        $("#PaperSelection").children().remove();
+                        $("#PaperSelection").prepend(template);
+                        var selected = 0;
+                        $.each(result, function (index, item) {
+                            console.log(item["name"])
+                            if (item["name"] != first.text()) {
+                                $("#PaperSelection").append(template.clone().attr("value", item["id"]).text(item["name"]));
+                            } else {
+                                selected = first.val();
+                                $("#PaperSelection").append(first);
+                            }
+                        })
+                        $("#PaperSelection").val(selected)
+                    }
+                })
+            }
+
+        })
+        $("#PaperSelection").change(function () {
+            var Id = $(this).val();
+            if (Id > 0) {
+                $.ajax({
+                    url: "https://localhost:44347/Quotes/GetCardSizes",
+                    data: { paperId: Id },
+                    success: function (jsonString) {
+                        console.log(jsonString);
+                        var result = JSON.parse(jsonString)
+                        var template = $('<option />').text('Select CardSize').val('0');
+                        var first = $("#CardSizes").children("option:selected").clone();
+                        console.log(first);
+                        console.log(template);
+                        $("#CardSizes").children().remove();
+                        $("#CardSizes").prepend(template);
+                        var selected = 0;
+                        $.each(result, function (index, item) {
+                            console.log(item["name"])
+                            if (item["name"] != first.text()) {
+                                $("#CardSizes").append(template.clone().attr("value", item["id"]).text(item["name"]));
+                            } else {
+                                selected = first.val();
+                                $("#CardSizes").append(first);
+                            }
+                        })
+                        $("#CardSizes").val(selected)
+                    }
+
+                })
+
+            }
+        })
+
+
+
+    </script>
+}
+

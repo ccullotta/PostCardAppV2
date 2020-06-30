@@ -1,0 +1,79 @@
+﻿@model IEnumerable<PostCardAppV2.Models.Paper>
+@using System.Text;
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+@*<form asp-action="UploadCsv" id="CsvForm">*@
+    <form method="post" enctype="multipart/form-data" id="CsvForm"  asp-action="UploadCsv">
+        <div class="d-flex flex-column ">
+            <a asp-action="Create">Create New</a>
+            <a href="#" onclick="DisplayCsvUpload()">Import Csv</a>
+            <div style="display:none" id="FileImport">
+                <input type="file" name="postedFile" accept=".csv" required/>
+                @*<input type="submit" value="Upload">*@
+            </div>
+            <a href="#" id="CsvButton" style="display:none" onclick="SubmitForm()">Upload</a>
+        </div>
+    </form>
+
+
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Name)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.CostAssignments)
+                </th>
+                <th>
+                    Compatible Sizes
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </td>
+                    <td>
+                        @{StringBuilder Costs = new StringBuilder();}
+                        @foreach (var cost in item.CostAssignments)
+                        {
+                            Costs.Append(cost + ", ");
+                        }
+                        @Costs
+                        @*@Html.DisplayFor(modelItem => item.CostAssignments)*@
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => (item.CompatibleSizes))
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
+                        <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @section Scripts {
+        @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+        <script>
+
+            function SubmitForm() {
+                $("#CsvForm").submit();
+            }
+
+            function DisplayCsvUpload() {
+                $("#FileImport").toggle();
+                $("#CsvButton").toggle();
+            }
+        </script>
+    }
+

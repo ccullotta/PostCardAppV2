@@ -1,0 +1,72 @@
+﻿@model PostCardAppV2.Models.Quote
+
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<h1>Delete</h1>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>Quote</h4>
+    <hr />
+    <div class="col-md-6">
+        <dl class="row">
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.ID)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.ID)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.CustomerName)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.CustomerName)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.CardSize)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.CardSize)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Paper)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Paper)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Color)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Color)
+            </dd>
+
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.WithBleed)
+            </dt>
+            <dd class="col-sm-10">
+                @{ var ret = Model.DisplayBleed();}
+                @ret
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.CreatedOn)
+            </dt>
+            <dd class="col-sm-10">
+                @{
+                    var timezone = TimeZoneInfo.FindSystemTimeZoneById("Central Standard Time");
+                    var result = TimeZoneInfo.ConvertTimeFromUtc(Model.CreatedOn, timezone);
+                }
+                @result
+            </dd>
+        </dl>
+
+    </div>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="ID" />
+        <input type="submit" value="Delete" class="btn btn-danger" /> |
+        <a asp-action="Index">Back to List</a>
+    </form>
+</div>

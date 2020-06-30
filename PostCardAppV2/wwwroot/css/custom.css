@@ -1,0 +1,15 @@
+﻿.table-form {
+    display: flex;
+    flex-direction: row;
+}
+
+.table-labels {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.table-labels * {
+    margin-bottom: 0px;
+    font-size: 19px;
+}

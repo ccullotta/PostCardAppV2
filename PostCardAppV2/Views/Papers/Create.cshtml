@@ -1,0 +1,82 @@
+﻿@model PostCardAppV2.Models.dtos.PaperCreateModel
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>Paper</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+
+                <label asp-for="Weight" class="control-label"></label>
+                <input asp-for="Weight" class="form-control" />
+                <span asp-validation-for="Weight" class="text-danger"></span>
+
+                <label asp-for="PaperCoating" class="control-label"></label>
+                <select asp-for="PaperCoating" class="form-control" asp-items="Html.GetEnumSelectList<Coating>()">
+                    <option>Select Coating</option>
+                </select>
+                <span asp-validation-for="PaperCoating" class="text-danger"></span>
+
+                <label asp-for="PaperStockType" class="control-label"></label>
+                <select asp-for="PaperStockType" class="form-control" asp-items="Html.GetEnumSelectList<StockType>()">
+                    <option>Select StockType</option>
+                </select>
+                <span asp-validation-for="PaperStockType" class="text-danger"></span>
+
+                <label asp-for="PaperColor" class="control-label"></label>
+                <input asp-for="PaperColor" value="white" class="form-control" />
+                <span asp-validation-for="PaperColor" class="text-danger"></span>
+            </div>
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>
+                            Sheet Size
+                        </th>
+                        <th>
+                            Price
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < Model.SheetPricing.Count; i++)
+                    {
+                        <tr>
+                            <td name="CostAssignments[@i].SheetId" value="@i"> @Model.SheetPricing.Keys.ElementAt(i) </td>
+                            <td>
+                                <input id="PriceInput" value="@Model.SheetPricing.Keys.ElementAt(i)" class="form-control inputs valid" type="hidden" name="SheetPricing[@i].Key" readonly="readonly" aria-invalid="false">
+                                <input id="PriceInput" value="@Model.SheetPricing.Values.ElementAt(i)" class="form-control inputs valid" type="text" name="SheetPricing[@i].Value" aria-invalid="false">
+
+                            </td>
+                        </tr>
+
+
+                    }
+                </tbody>
+            </table>
+
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+                <div class="text-danger"> @ViewData["ErrorMessage"] </div>
+                <span asp-validation-for="SheetPricing" class="text-danger"></span>
+
+
+            </div>
+        </form>
+    </div>
+</div>
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

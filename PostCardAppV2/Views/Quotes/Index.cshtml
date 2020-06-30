@@ -1,0 +1,101 @@
+﻿@model IEnumerable<PostCardAppV2.Models.Quote>
+@using PostCardAppV2.Backend;
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+<div class="d-flex flex-column">
+    <a asp-action="Create">Create New</a>
+    <a href="#" id="search"onclick="ShowSearchBar(this)">search by ID or Date</a>
+
+</div>
+
+<form class="cols-md-2 " id="SearchBar" style="display:none" method="get">
+    <div class="form-group input-group-sm d-inline-flex  mb-0">
+        <div class=" input-group-sm table-labels">
+            <label>ID: </label>
+            <input class="form-control ml-4 " name="id" type="number" min="1" placeholder="id" />
+            <label class="ml-4">Date: </label>
+            <input class="form-control ml-4" name="date" type="date"  />
+        </div>
+
+        <button class="btn btn-secondary btn-sm ml-4 " type="submit">Search</button>
+
+    </div>
+</form>
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.ID)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Paper)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.WithBleed)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CardSize)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Color)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CustomerName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CreatedOn)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ID)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Paper)
+                </td>
+                <td>
+                    @{ var ret = item.DisplayBleed();}
+                    @ret
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CardSize)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Color)
+                </td>
+                <td>
+                    @item.CustomerName
+                </td>
+                <td>
+                    @{var x = TimeExtension.ToReadableString(DateTime.UtcNow.Subtract(item.CreatedOn));}
+                    @Html.DisplayFor(modelItem => x)
+                </td>
+                <td>
+                    <a asp-action="Delete" asp-route-id="@item.ID">Delete</a> |
+                    <a asp-action="Details" asp-route-id="@item.ID">Details</a>
+
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts{
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+<script>
+    function ShowSearchBar(arg) {
+        $("#SearchBar").toggle()
+
+    }
+</script>
+
+}
